@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: torpedo-controller
+  namespace: metacontroller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      torpedo-controller: enabled
+  template:
+    metadata:
+      labels:
+        torpedo-controller: enabled
+    spec:
+      serviceAccountName: resiliency
+      nodeSelector:
+        torpedo-controller: enabled
+      containers:
+      - name: controller
+        image: hemanth43/python_pyyaml_jinja2:3.5
+        ports:
+        - containerPort: 30025
+        command: ["python3", "/hooks/sync.py"]
+        volumeMounts:
+        - name: torpedo-metacontroller
+          mountPath: /hooks
+        - name: hooks
+          mountPath: /hooks/templates
+          
+      volumes:
+      - name: hooks
+        configMap:
+          name: torpedo-controller
+          items:
+            - key: torpedo-chaos-job.yaml
+              path: torpedo-chaos.yaml
+            - key: sanity_checks.yaml
+              path: sanity_checks.yaml
+            - key: torpedo_argo.j2
+              path: torpedo_argo.j2
+            - key: traffic-parameters.yaml
+              path: traffic-parameters.yaml
+            - key: chaos-parameters.yaml
+              path: chaos-parameters.yaml
+            - key: torpedo-traffic-orchestrator.yaml
+              path: torpedo-traffic-orchestrator.yaml
+
+      - name: torpedo-metacontroller
+        configMap:
+          name: torpedo-metacontroller
+          items:
+            - key: torpedo-metacontroller
+              path: sync.py
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: torpedo-controller
+  namespace: metacontroller
+  labels:
+    torpedo-controller: enabled
+spec:
+  selector:
+    torpedo-controller: enabled
+  type: NodePort
+  ports:
+    - port: 30025
+      nodePort: 30025

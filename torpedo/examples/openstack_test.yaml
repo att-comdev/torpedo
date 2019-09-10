@@ -1,0 +1,42 @@
+apiVersion: torpedo.k8s.att.io/v1
+kind: Torpedo
+metadata:
+  name: openstack-torpedo-test
+spec:
+  auth:
+    auth_url: http://keystone-api.openstack.svc.cluster.local:5000/v3
+    username: admin
+    password: abcdefghijk
+    user_domain_name: default
+    project_domain_name: default
+    project_name: admin
+
+  job-params:
+    - - service: nova
+        component: os-api
+        kill-interval: 30
+        kill-count: 4
+        same-node: True
+        pod-labels:
+          - 'application=nova'
+          - 'component=os-api'
+        node-labels:
+          - 'openstack-nova-control=enabled'
+        service-mapping: nova
+        name: nova-os-api
+        nodes: '[]'
+        max-nodes: 2
+        sanity-checks: '[]'
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+  namespace: openstack
+  orchestrator_plugin: "torpedo-traffic-orchestrator"
+  chaos_plugin: "torpedo-chaos"
+  volume_storage_class: "general"
+  volume_storage: "10Gi"
+  volume_name: "openstack-torpedo-test"
+  remote-cluster: "True"
+  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  remote-cluster-token: "<kubernetes token to authenticate to the cluster>"

@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: resiliency
+  namespace: metacontroller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: resiliency
+rules:
+- apiGroups: [""]
+  resources: ["*"]
+  verbs: ["get","list", "delete"]
+- apiGroups: [""]
+  resources: ["pods", "services", "configmaps"]
+  verbs: ["get","list","create", "delete", "deletecollection"]
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get","list","create", "delete", "deletecollection"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "get", "list", "watch"]
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "status", "watch", "create", "update", "patch", "delete", "deletecollection"]
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs/status"]
+  verbs: ["get", "list", "status", "watch", "create", "update", "patch", "delete", "deletecollection"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get","list","create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: resiliency
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: resiliency
+subjects:
+- kind: ServiceAccount
+  name: resiliency
+  namespace: metacontroller

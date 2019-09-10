@@ -1,0 +1,75 @@
+apiVersion: torpedo.k8s.att.io/v1
+kind: Torpedo
+metadata:
+  name: openstack-torpedo
+spec:
+  auth:
+    auth_url: http://keystone-api.openstack.svc.cluster.local:5000/v3
+    username: admin
+    password: abcdefghijk
+    user_domain_name: default
+    project_domain_name: default
+    project_name: admin
+
+  job-params:
+    - - service: heat
+        component: engine
+        service-mapping: node-drain
+        job-duration: 0
+        count: 0
+        name: torpedo-node-drain
+        extra-args: ''
+        enable-chaos: "False"
+        nodes:
+          - ipmi_ip: <ipmi ip>
+            node_name: <target node to shutdown>
+            user: <ipmi username>
+            password: <ipmi password>
+        sanity-checks:
+          - name: pod-list
+            image: kiriti29/torpedo-traffic-generator:v1
+            command:
+              - /bin/bash
+              - sanity_checks.sh
+              - pod-list
+              - "2000"
+              - "kubectl get pods --all-namespaces -o wide"
+          - name: debug-report
+            image: kiriti29/torpedo-traffic-generator:v1
+            command:
+              - /bin/bash
+              - debug_report.sh
+          - name: node-list
+            image: kiriti29/torpedo-traffic-generator:v1
+            command:
+              - /bin/bash
+              - sanity_checks.sh
+              - node-list
+              - "2000"
+              - "kubectl get nodes --all-namespaces -o wide"
+          - name: ceph-status
+            image: kiriti29/torpedo-traffic-generator:v1
+            command:
+              - /bin/bash
+              - sanity_checks.sh
+              - ceph-sanity-checks
+              - "2000"
+              - "kubectl exec -it ceph-mon-dg4gl -n ceph -- ceph health | tee $ceph_sanity_checks 1>/dev/null"
+          - name: rabbitmq-status
+            image: kiriti29/torpedo-traffic-generator:v1
+            command:
+              - /bin/bash
+              - sanity_checks.sh
+              - rabbitmq-sanity-checks
+              - "2000"
+              - "kubectl exec -it clcp-glance-rabbitmq-rabbitmq-1 -n openstack -- rabbitmqctl cluster_status | tee $rabbit_sanity_checks 1>/dev/null"
+
+  namespace: openstack
+  orchestrator_plugin: "torpedo-traffic-orchestrator"
+  chaos_plugin: "torpedo-chaos"
+  volume_storage_class: "general"
+  volume_storage: "500Gi"
+  volume_name: "openstack-node-drain"
+  remote-cluster: True
+  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  remote-cluster-token: "<kubernetes token to authenticate to the cluster>"

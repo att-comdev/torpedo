@@ -1,0 +1,138 @@
+apiVersion: torpedo.k8s.att.io/v1
+kind: Torpedo
+metadata:
+  name: ucp-torpedo
+spec:
+  auth:
+    auth_url: http://keystone-api.ucp.svc.cluster.local:5000/v3
+    username: admin
+    password: abcdefghijk
+    user_domain_name: default
+    project_domain_name: default
+    project_name: admin
+
+  job-params:
+    - - service: promenade
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=promenade'
+          - 'component=api'
+        node-labels:
+          - 'ucp-promenade=enabled'
+        service-mapping: promenade
+        name: promenade-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: shipyard
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=shipyard'
+          - 'component=api'
+        node-labels:
+          - 'ucp-shipyard=enabled'
+        service-mapping: shipyard
+        name: shipyard-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: armada
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=armada'
+          - 'component=api'
+        node-labels:
+          - 'ucp-armada=enabled'
+        service-mapping: armada
+        name: armada-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: deckhand
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=deckhand'
+          - 'component=api'
+        node-labels:
+          - 'ucp-deckhand=enabled'
+        service-mapping: deckhand
+        name: deckhand-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: barbican
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=barbican'
+          - 'component=api'
+        node-labels:
+          - 'ucp-barbican=enabled'
+        service-mapping: barbican
+        name: barbican-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: keystone
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=keystone'
+          - 'component=api'
+        node-labels:
+          - 'ucp-keystone=enabled'
+        service-mapping: keystone
+        name: keystone-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+
+  namespace: ucp
+  orchestrator_plugin: "torpedo-traffic-orchestrator"
+  chaos_plugin: "torpedo-chaos"
+  volume_storage_class: "general"
+  volume_storage: "10Gi"
+  volume_name: "ucp-torpedo"
+  remote-cluster: "True"
+  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  remote-cluster-token: "<kubernetes token to authenticate to the cluster>"

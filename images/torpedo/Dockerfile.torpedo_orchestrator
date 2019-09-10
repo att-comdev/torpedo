@@ -1,0 +1,9 @@
+FROM python:3.6
+
+RUN apt update -y && apt upgrade -y && apt install -y python3-pip jq 
+RUN pip3 install requests pyghmi kubernetes
+WORKDIR /opt/torpedo
+COPY entrypoint.sh entrypoint.sh
+RUN /bin/bash entrypoint.sh
+COPY plugins/orchestrator/torpedo_orchestrator/* .
+CMD ["/bin/bash"]

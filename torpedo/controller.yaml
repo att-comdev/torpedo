@@ -1,0 +1,19 @@
+---
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: CompositeController
+metadata:
+  name: torpedo-controller
+spec:
+  generateSelector: true
+  parentResource:
+    apiVersion: torpedo.k8s.att.io/v1
+    resource: torpedos
+  childResources:
+  - apiVersion: argoproj.io/v1alpha1
+    resource: workflows
+    updateStrategy:
+      method: InPlace
+  hooks:
+    sync:
+      webhook:
+        url: http://torpedo-controller.metacontroller.svc.cluster.local:30025/sync

@@ -1,0 +1,525 @@
+apiVersion: torpedo.k8s.att.io/v1
+kind: Torpedo
+metadata:
+  name: openstack-torpedo
+spec:
+  auth:
+    auth_url: http://keystone-api.openstack.svc.cluster.local:5000/v3
+    username: admin
+    password: abcdefghijk
+    user_domain_name: default
+    project_domain_name: default
+    project_name: admin
+
+  job-params:
+    - - service: nova
+        component: os-api
+        kill-interval: 30
+        kill-count: 5
+        same-node: True
+        pod-labels:
+          - 'application=nova'
+          - 'component=os-api'
+        node-labels:
+          - 'openstack-nova-control=enabled'
+        service-mapping: nova
+        name: nova-os-api
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: glance
+        component: api
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=glance'
+          - 'component=api'
+        node-labels:
+          - 'openstack-glance=enabled'
+        service-mapping: glance
+        name: glance-api
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: cinder
+        component: api
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=cinder'
+          - 'component=api'
+        node-labels:
+          - 'openstack-cinder-control=enabled'
+        service-mapping: cinder
+        name: cinder-api
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: heat
+        component: api
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=heat'
+          - 'component=api'
+        node-labels:
+          - 'openstack-heat=enabled'
+        service-mapping: heat
+        name: heat-api
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: neutron
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=neutron'
+          - 'component=api'
+        node-labels:
+          - 'openstack-neutron=enabled'
+        service-mapping: neutron
+        name: neutron-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: keystone
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=keystone'
+          - 'component=api'
+        node-labels:
+          - 'ucp-keystone=enabled'
+        service-mapping: keystone
+        name: keystone-api
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: rabbitmq
+        component: server
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=rabbitmq'
+          - 'component=server'
+          - 'release_group=clcp-nova-rabbitmq'
+        node-labels:
+          - 'openstack-rabbitmq=enabled'
+        service-mapping: boot
+        name: nova-rabbitmq
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: rabbitmq
+        component: server
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=rabbitmq'
+          - 'component=server'
+          - 'release_group=clcp-glance-rabbitmq'
+        node-labels:
+          - 'openstack-rabbitmq=enabled'
+        service-mapping: registry
+        name: glance-rabbitmq
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: rabbitmq
+        component: server
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=rabbitmq'
+          - 'component=server'
+          - 'release_group=clcp-neutron-rabbitmq'
+        node-labels:
+          - 'openstack-rabbitmq=enabled'
+        service-mapping: neutron-l3-agent
+        name: neutron-rabbitmq
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: rabbitmq
+        component: server
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=rabbitmq'
+          - 'component=server'
+          - 'release_group=clcp-cinder-rabbitmq'
+        node-labels:
+          - 'openstack-rabbitmq=enabled'
+        service-mapping: volume
+        name: cinder-rabbitmq
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: rabbitmq
+        component: server
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=rabbitmq'
+          - 'component=server'
+          - 'release_group=clcp-heat-rabbitmq'
+        node-labels:
+          - 'openstack-rabbitmq=enabled'
+        service-mapping: heat-engine
+        name: heat-rabbitmq
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: nova
+        component: compute
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=nova'
+          - 'component=compute'
+        node-labels:
+          - 'openstack-nova-compute=enabled'
+        service-mapping: boot
+        name: nova-compute
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: glance
+        component: registry
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=glance'
+          - 'component=registry'
+        node-labels:
+          - 'openstack-glance=enabled'
+        service-mapping: registry
+        name: glance-registry
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: neutron
+        component: l3-agent
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=neutron'
+          - 'component=l3-agent'
+        node-labels:
+          - 'openstack-neutron=enabled'
+        service-mapping: neutron-l3-agent
+        name: neutron-l3-agent
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: cinder
+        component: volume
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=cinder'
+          - 'component=volume'
+        node-labels:
+          - 'openstack-cinder-volume=control'
+        service-mapping: volume
+        name: cinder-volume
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: heat
+        component: engine
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=heat'
+          - 'component=engine'
+        node-labels:
+          - 'openstack-heat=enabled'
+        service-mapping: heat-engine
+        name: heat-engine
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: nova
+        component: conductor
+        kill-interval: 30
+        kill-count: 3
+        same-node: True
+        pod-labels:
+          - 'application=nova'
+          - 'component=conductor'
+        node-labels:
+          - 'openstack-nova-control=enabled'
+        service-mapping: boot
+        name: nova-conductor
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: nova
+        component: scheduler
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=nova'
+          - 'component=scheduler'
+        node-labels:
+          - 'openstack-nova-control=enabled'
+        service-mapping: boot
+        name: nova-scheduler
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+      - service: cinder
+        component: scheduler
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=cinder'
+          - 'component=scheduler'
+        node-labels:
+          - 'openstack-cinder-control=enabled'
+        service-mapping: volume
+        name: cinder-volume
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: libvirt
+        component: libvirt
+        kill-interval: 30
+        kill-count: 1
+        same-node: True
+        pod-labels:
+          - 'application=libvirt'
+          - 'component=libvirt'
+        node-labels:
+          - 'openstack-libvirt=kernel'
+        service-mapping: boot
+        name: libvirt
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+        enable-chaos: "False"
+
+    - - service: neutron
+        component: dhcp-agent
+        kill-interval: 30
+        kill-count: 2
+        same-node: False
+        pod-labels:
+          - 'application=neutron'
+          - 'component=dhcp-agent'
+        node-labels:
+          - 'openstack-dhcp-agent=enabled'
+        service-mapping: vm_ping
+        name: libvirt
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: ingress
+        component: server
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=ingress'
+          - 'component=server'
+        node-labels:
+          - 'openstack-ingress=enabled'
+        service-mapping: keystone
+        name: ingress
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: mariadb
+        component: server
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=mariadb'
+          - 'component=server'
+        node-labels:
+          - 'openstack-mariadb=enabled'
+        service-mapping: keystone
+        name: mariadb-server
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: memcached
+        component: server
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=memcached'
+          - 'component=server'
+        node-labels:
+          - 'openstack-memcached=enabled'
+        service-mapping: keystone
+        name: memcached-server
+        nodes: ''
+        max-nodes: 2
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+
+    - - service: openvswitch
+        component: openvswitch-vswitchd-db
+        kill-interval: 30
+        kill-count: 1
+        same-node: True
+        pod-labels:
+          - 'application=openvswitch'
+          - 'component=openvswitch-vswitchd-db'
+        node-labels:
+          - 'openvswitch=enabled=enabled'
+        service-mapping: vm_ping
+        name: openvswitch-vswitchd-db
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+        enable-chaos: "False"
+
+    - - service: openvswitch
+        component: openvswitch-vswitchd
+        kill-interval: 30
+        kill-count: 1
+        same-node: True
+        pod-labels:
+          - 'application=openvswitch'
+          - 'component=openvswitch-vswitchd'
+        node-labels:
+          - 'openvswitch=enabled=enabled'
+        service-mapping: vm_ping
+        name: openvswitch-vswitchd
+        nodes: ''
+        max-nodes: 1
+        sanity-checks: ''
+        extra-args: ""
+        job-duration: 100
+        count: 60
+        enable-chaos: "False"
+
+  namespace: openstack
+  orchestrator_plugin: "torpedo-traffic-orchestrator"
+  chaos_plugin: "torpedo-chaos"
+  volume_storage_class: "general"
+  volume_storage: "10Gi"
+  volume_name: "openstack-torpedo"
+  remote-cluster: "True"
+  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  remote-cluster-token: "<kubernetes token to authenticate to the cluster>"

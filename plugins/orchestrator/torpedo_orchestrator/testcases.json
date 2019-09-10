@@ -1,0 +1,429 @@
+{
+                "node-power-off": {
+                                "name": "node_power_off",
+                                "operation": "POST",
+                                "service-mapping": "NodePowerOff"
+                                },
+		"nova": {
+				"name": "nova_list",
+				"service_type": "compute",
+				"operation": "GET",
+				"url": "/servers",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Nova"
+		},
+		"boot": {
+				"name": "nova_boot",
+				"service_type": "compute",
+				"headers": {
+						"OpenStack-API-Version": "compute 2.37",
+						"X-OpenStack-Nova-API-Version": "2.37"
+				},
+				"flavor": "m1.tiny",
+				"private_network": "test",
+				"public_network": "public",
+				"operation": "POST",
+				"url": "/servers",
+				"concurrency": 1,
+				"repeat": 2,
+				"duration": "duration",
+				"service-mapping": "Nova"
+		},
+		"glance": {
+				"name": "glance_image_list",
+				"service_type": "image",
+				"operation": "GET",
+				"url": "/v2/images",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Glance"
+		},
+		"horizon": {
+				"name": "horizon",
+				"url": "url",
+				"headers": "",
+				"data": "",
+				"repeat": 20,
+				"operation": "GET",
+				"concurrency": 1,
+				"duration": "duration",
+				"service-mapping": "Horizon"
+		},
+		"neutron-l3-agent": {
+				"name": "neutron_create_router",
+				"service_type": "network",
+				"operation": "POST",
+				"url": "/v2.0/routers",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"data": {
+						"router": {
+								"name": "test-resiliency-1"
+					}
+				},
+				"service-mapping": "Neutron"
+		},
+		"vm-ping": {
+				"name": "nova_vm_ping",
+				"service_type": "compute",
+				"headers": {
+						"OpenStack-API-Version": "compute 2.37",
+						"X-OpenStack-Nova-API-Version": "2.37"
+				},
+				"flavor": "m1.tiny",
+				"private_network": "test",
+				"public_network": "public",
+				"operation": "POST",
+				"url": "/servers",
+				"concurrency": 1,
+				"repeat": 2,
+				"duration": "duration",
+				"service-mapping": "VmPing"
+		},
+		"keystone": {
+				"name": "keystone_endpoint_list",
+				"service_type": "identity",
+				"operation": "GET",
+				"url": "/services",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Keystone"
+		},
+		"neutron": {
+				"name": "neutron_port_list",
+				"service_type": "network",
+				"operation": "GET",
+				"url": "/v2.0/ports",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Neutron"
+		},
+		"heat": {
+				"name": "heat_stack_list",
+				"service_type": "orchestration",
+				"operation": "GET",
+				"url": "/stacks",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Heat"
+		},
+		"cinder": {
+				"name": "cinder_volume_list",
+				"service_type": "volumev3",
+				"operation": "GET",
+				"url": "/volumes",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Cinder"
+		},
+		"volume": {
+				"name": "cinder_create_volume",
+				"service_type": "volumev3",
+				"operation": "POST",
+				"url": "/volumes",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "Cinder",
+				"data": {
+                    "volume": {
+                        "size": 1,
+                        "availability_zone": "None",
+                        "source_volid": "None",
+                        "description": "None",
+                        "multiattach": "False",
+                        "snapshot_id": "None",
+                        "backup_id": "None",
+                        "name": "None",
+                        "imageRef": "None",
+                        "volume_type": "None",
+                        "metadata": {},
+                        "consistencygroup_id": "None"
+                    }
+                }
+		},
+		"registry": {
+				"name": "glance_image_create",
+				"service_type": "image",
+				"operation": "POST",
+				"url": "/v2/tasks",
+				"repeat": 1,
+				"duration": "duration",
+				"service-mapping": "Glance",
+				"data": {
+						"type": "import",
+						"input": {
+								"import_from_format": "qcow2",
+								"image_properties": {
+										"name": "test-resiliency-1",
+										"disk_format": "qcow2",
+										"container_format": "bare"
+							}
+						}
+				}
+		},
+		"node-drain": {
+				 "name": "heat_stack_create",
+				 "service_type": "orchestration",
+				 "operation": "POST",
+				 "url": "/stacks",
+				 "concurrency": 1,
+				 "repeat": 0,
+				 "duration": "duration",
+ 				 "service-mapping": "NodeDrain",
+				 "data": {
+						 "files": {},
+						 "disable_rollback": "true",
+						 "stack_name": "test-resiliency-15",
+						 "timeout": 900,
+						 "template": {
+												 "heat_template_version": "2014-10-16",
+												 "description": "Test node drain",
+												 "parameters": {
+													 "slave_count": {
+														 "type": "number",
+														 "label": "Slave Count",
+														 "description": "Number of slaves",
+														 "default": 8
+													 },
+													 "image_id": {
+														 "type": "string",
+														 "label": "Image ID",
+														 "description": "Image to be used (RHEL/Centos 7 compat) for base OS",
+														 "default": "cirros"
+													 },
+													 "slave_flavor": {
+														 "type": "string",
+														 "label": "Slave Instance Type",
+														 "description": "Type of instance (flavor) to deploy",
+														 "default": "m1.tiny"
+													 },
+													 "private_net_id": {
+														 "type": "string",
+														 "description": "ID of private network into which servers get deployed",
+														 "default": "test"
+													 }
+												 },
+												 "resources": {
+													 "slaveresources": {
+														 "type": "OS::Heat::ResourceGroup",
+														 "properties": {
+															 "count": {
+																 "get_param": "slave_count"
+															 },
+															 "resource_def": {
+																 "type": "OS::Nova::Server",
+																 "properties": {
+																	 "image": {
+																		 "get_param": "image_id"
+																	 },
+																	 "flavor": {
+																		 "get_param": "slave_flavor"
+																	 },
+																	 "name": "test",
+																	 "networks": [
+																		 {
+																			 "network": {
+																				 "get_param": "private_net_id"
+																			 }
+																		 }
+																	 ]
+																 }
+															 }
+														 }
+													 }
+												 }
+											 }
+			  }
+},
+		"heat-engine": {
+				 "name": "heat_stack_create",
+				 "service_type": "orchestration",
+				 "operation": "POST",
+				 "url": "/stacks",
+				 "concurrency": 1,
+				 "repeat": 0,
+				 "duration": "duration",
+ 				 "service-mapping": "Heat",
+				 "data": {
+						 "files": {},
+						 "disable_rollback": "true",
+						 "stack_name": "test-resiliency-15",
+						 "timeout": 900,
+						 "template": {
+												 "heat_template_version": "2014-10-16",
+												 "description": "Test node drain",
+												 "parameters": {
+													 "slave_count": {
+														 "type": "number",
+														 "label": "Slave Count",
+														 "description": "Number of slaves",
+														 "default": 8
+													 },
+													 "image_id": {
+														 "type": "string",
+														 "label": "Image ID",
+														 "description": "Image to be used (RHEL/Centos 7 compat) for base OS",
+														 "default": "cirros"
+													 },
+													 "slave_flavor": {
+														 "type": "string",
+														 "label": "Slave Instance Type",
+														 "description": "Type of instance (flavor) to deploy",
+														 "default": "m1.tiny"
+													 },
+													 "private_net_id": {
+														 "type": "string",
+														 "description": "ID of private network into which servers get deployed",
+														 "default": "test"
+													 }
+												 },
+												 "resources": {
+													 "slaveresources": {
+														 "type": "OS::Heat::ResourceGroup",
+														 "properties": {
+															 "count": {
+																 "get_param": "slave_count"
+															 },
+															 "resource_def": {
+																 "type": "OS::Nova::Server",
+																 "properties": {
+																	 "image": {
+																		 "get_param": "image_id"
+																	 },
+																	 "flavor": {
+																		 "get_param": "slave_flavor"
+																	 },
+																	 "name": "test",
+																	 "networks": [
+																		 {
+																			 "network": {
+																				 "get_param": "private_net_id"
+																			 }
+																		 }
+																	 ]
+																 }
+															 }
+														 }
+													 }
+												 }
+											 }
+			  }
+},
+
+		"barbican": {
+				"name": "barbican_secrets_list",
+				"service_type": "key-manager",
+				"operation": "GET",
+				"url": "/secrets",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+				},
+	"deckhand": {
+				"name": "deckhand_list_revisions",
+				"service_type": "deckhand",
+				"operation": "GET",
+				"url": "/revisions",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+			 },
+		"shipyard": {
+				"name": "shipyard_get_configdocs",
+				"service_type": "shipyard",
+				"operation": "GET",
+				"url": "/configdocs",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+			 },
+		"drydock": {
+				"name": "drydock_get_nodes",
+				"service_type": "physicalprovisioner",
+				"operation": "GET",
+				"url": "/nodes",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+			 },
+		"armada": {
+				"name": "armada_get_releases",
+				"service_type": "armada",
+				"operation": "GET",
+				"url": "/releases",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+			 },
+		"promenade": {
+				"name": "promande_get_health",
+				"service_type": "kubernetesprovisioner",
+				"operation": "GET",
+				"url": "/health",
+				"concurrency": 1,
+				"repeat": 20,
+				"duration": "duration",
+				"service-mapping": "UCP"
+			},
+		"kubernetes-api": {
+		    "name": "kubernetes_pod_list",
+		    "operation": "GET",
+		    "url": "/pods",
+		    "concurrency": 1,
+		    "repeat": 20,
+		    "duration": "duration",
+				"service-mapping": "Kubernetes",
+		    "headers": {
+		         "Authorization": "Bearer password"
+		    }
+		},
+		"kubernetes-connect-pod": {
+		    "name": "kubernetes_connect_pod",
+		    "operation": "POST",
+		    "url": "/pods",
+		    "port": 30080,
+		    "repeat": 20,
+		    "duration": "duration",
+				"service-mapping": "Kubernetes",
+		    "headers": {
+		         "Authorization": "Bearer password"
+		    }
+		},
+		"kubernetes-coredns": {
+		   "name": "kubernetes-coredns",
+		   "operation": "GET",
+		   "url": "keystone-api.ucp.svc.cluster.local ",
+		   "concurrency": 1,
+		   "repeat": 20,
+		   "duration": "duration",
+			 "service-mapping": "Kubernetes",
+		   "headers": {
+		        "Authorization": "Bearer password"
+		   }
+		},
+		"kubernetes-launch-pod": {
+		         "name": "kubernetes_create_pod",
+		         "operation": "POST",
+		         "url": "/pods",
+		         "repeat": 20,
+		         "duration": "duration",
+						 "service-mapping": "Kubernetes",
+		         "headers": {
+		              "Authorization": "Bearer password"
+		         }
+		}
+}

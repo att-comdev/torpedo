@@ -1,0 +1,42 @@
+apiVersion: torpedo.k8s.att.io/v1
+kind: Torpedo
+metadata:
+  name: ucp-torpedo-test
+spec:
+  auth:
+    auth_url: http://keystone-api.ucp.svc.cluster.local:5000/v3
+    username: admin
+    password: abcdefghijk
+    user_domain_name: default
+    project_domain_name: default
+    project_name: admin
+
+  job-params:
+    - - service: promenade
+        component: api
+        kill-interval: 30
+        kill-count: 1
+        same-node: False
+        pod-labels:
+          - 'application=promenade'
+          - 'component=api'
+        node-labels:
+          - 'ucp-promenade=enabled'
+        service-mapping: promenade
+        name: promenade-api
+        nodes: ''
+        max-nodes: 1
+        extra-args: ''
+        job-duration: 60
+        count: 60
+        sanity-checks: ""
+
+  orchestrator_plugin: "torpedo-traffic-orchestrator"
+  chaos_plugin: "torpedo-chaos"
+  namespace: ucp
+  volume_storage_class: "general"
+  volume_storage: "10Gi"
+  volume_name: "ucp-torpedo-test"
+  remote-cluster: "True"
+  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  remote-cluster-token: "<kubernetes token to authenticate to the cluster>"
