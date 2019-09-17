@@ -1,5 +1,7 @@
 from pyghmi.ipmi import command
 from pyghmi.exceptions import IpmiException
+from time import sleep
+
 from logger_agent import logger
 
 
@@ -31,15 +33,20 @@ class power_operation():
     def set_power_state(self, state):
         """ Set power state to passed state """
         attempts = 0
+        ipmi_object = None
         while attempts < 5:
             try:
                 ipmi_object = self.initialize_ipmi_session()
-                ipmi_object.set_power(state)
-                break
+                response = ipmi_object.set_power(state)
+                ipmi_object.ipmi_session.logout()
+                status = True
+                return response, status
             except IpmiException as iex:
                 logger.error("Error sending command: %s" % str(iex))
                 logger.warning(
                     "IPMI command failed, retrying after 15 seconds...")
+                if ipmi_object:
+                    ipmi_object.ipmi_session.logout()
                 sleep(15)
                 attempts = attempts + 1
 
@@ -59,9 +66,13 @@ class NodePowerOff:
         tc_status = "FAIL"
         message = "Failed to power off the node"
         for node in self.nodes:
-            po = power_operation(node['ipmi_ip'], node['user'], node['password'])
-            logger.info("Powering off node %s" % (node['node_name']))
-            po.set_power_state("off")
+            attempts = 0
+            while attempts <= 5:
+                po = power_operation(node['ipmi_ip'], node['user'], node['password'])
+                logger.info("Powering off node %s" % (node['node_name']))
+                response, status = po.set_power_state("off")
+                if status:
+                    break
             tc_status = "PASS"
             message = "Powered off the node %s" % (node['node_name'])
         return tc_status, message, self.tc

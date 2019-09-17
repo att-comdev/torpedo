@@ -26,7 +26,7 @@ spec:
         name: nova-os-api
         nodes: '[]'
         max-nodes: 2
-        sanity-checks: '[]'
+        sanity-checks: ''
         extra-args: ""
         job-duration: 100
         count: 60

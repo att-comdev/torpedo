@@ -71,7 +71,7 @@ ifeq ($(USE_PROXY), true)
 		--label "org.opencontainers.image.revision=$(COMMIT)" \
 		--label "org.opencontainers.image.created=$(shell date --rfc-3339=seconds --utc)" \
 		--label "org.opencontainers.image.title=$(CHAOS_IMAGE_NAME)" \
-		-f images/torpedo/Dockerfile.torpedo_orchestrator \
+		-f images/torpedo/Dockerfile.torpedo_chaos \
 		--build-arg http_proxy=$(PROXY) \
 		--build-arg https_proxy=$(PROXY) \
 		--build-arg HTTP_PROXY=$(PROXY) \
@@ -83,7 +83,7 @@ else
 		--label "org.opencontainers.image.revision=$(COMMIT)" \
 		--label "org.opencontainers.image.created=$(shell date --rfc-3339=seconds --utc)" \
 		--label "org.opencontainers.image.title=$(CHAOS_IMAGE_NAME)" \
-		-f images/torpedo/Dockerfile.torpedo_orchestrator .
+		-f images/torpedo/Dockerfile.torpedo_chaos .
 endif
 
 ifeq ($(PUSH_CHAOS_IMAGE), true)

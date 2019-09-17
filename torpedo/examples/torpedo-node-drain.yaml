@@ -16,7 +16,7 @@ spec:
         component: engine
         service-mapping: node-drain
         job-duration: 0
-        count: 0
+        count: 1
         name: torpedo-node-drain
         extra-args: ''
         enable-chaos: "False"
@@ -54,7 +54,7 @@ spec:
               - sanity_checks.sh
               - ceph-sanity-checks
               - "2000"
-              - "kubectl exec -it ceph-mon-dg4gl -n ceph -- ceph health | tee $ceph_sanity_checks 1>/dev/null"
+              - "kubectl exec -it ceph-mon-dg4gl -n ceph -- ceph health"
           - name: rabbitmq-status
             image: kiriti29/torpedo-traffic-generator:v1
             command:
@@ -62,7 +62,7 @@ spec:
               - sanity_checks.sh
               - rabbitmq-sanity-checks
               - "2000"
-              - "kubectl exec -it clcp-glance-rabbitmq-rabbitmq-1 -n openstack -- rabbitmqctl cluster_status | tee $rabbit_sanity_checks 1>/dev/null"
+              - "kubectl exec -it clcp-openstack-rabbitmq-rabbitmq-0 -n openstack -- rabbitmqctl cluster_status"
 
   namespace: openstack
   orchestrator_plugin: "torpedo-traffic-orchestrator"
