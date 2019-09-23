@@ -236,7 +236,7 @@ data:
                     resources:
                       requests:
                         storage: {{spec['volume_storage']}}
-                    storageClassName: general
+                    storageClassName: {{spec['volume_storage_class']}}
 
             - name: sanity-checks
               inputs:

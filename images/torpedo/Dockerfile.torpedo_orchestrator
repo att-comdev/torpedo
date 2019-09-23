@@ -5,5 +5,5 @@ RUN pip3 install requests pyghmi kubernetes
 WORKDIR /opt/torpedo
 COPY entrypoint.sh entrypoint.sh
 RUN /bin/bash entrypoint.sh
-COPY plugins/orchestrator/torpedo_orchestrator/* /opt/torpedo/
+COPY plugins/orchestrator/torpedo_orchestrator /opt/torpedo/
 CMD ["/bin/bash"]
