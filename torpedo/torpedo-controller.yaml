@@ -31,6 +31,16 @@ data:
                 spec:
                   nodeSelector:
                     resiliency: enabled
+                  affinity:
+                    podAffinity:
+                      requiredDuringSchedulingIgnoredDuringExecution:
+                      - labelSelector:
+                          matchExpressions:
+                          - key: resiliency
+                            operator: In
+                            values:
+                            - enabled
+                        topologyKey: "kubernetes.io/hostname"
                   restartPolicy: OnFailure
                   containers:
                   - command: {{inputs.parameters.command}}
@@ -353,6 +363,16 @@ data:
                 serviceAccountName: resiliency
                 nodeSelector:
                   resiliency: enabled
+                affinity:
+                  podAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                    - labelSelector:
+                        matchExpressions:
+                        - key: resiliency
+                          operator: In
+                          values:
+                          - enabled
+                      topologyKey: "kubernetes.io/hostname"
                 restartPolicy: OnFailure
                 containers:
                 - command:
@@ -403,6 +423,16 @@ data:
                 serviceAccountName: resiliency
                 nodeSelector:
                   resiliency: enabled
+                affinity:
+                  podAffinity:
+                    requiredDuringSchedulingIgnoredDuringExecution:
+                    - labelSelector:
+                        matchExpressions:
+                        - key: resiliency
+                          operator: In
+                          values:
+                          - enabled
+                      topologyKey: "kubernetes.io/hostname"
                 restartPolicy: OnFailure
                 containers:
                 - command:

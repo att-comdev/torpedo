@@ -87,7 +87,7 @@ else
 endif
 
 ifeq ($(PUSH_CHAOS_IMAGE), true)
-    docker push $(CHAOS_IMAGE)
+                docker push $(CHAOS_IMAGE)
 endif
 
 .PHONY: install_metacontroller

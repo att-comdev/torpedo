@@ -17,8 +17,9 @@ formatter = logging.Formatter(
 stream_handle.setFormatter(formatter)
 LOG.addHandler(stream_handle)
 
-cmd = ("kubectl describe secret $(kubectl get secrets |"
-       "grep ^resiliency | cut -f1 -d ' ') | grep -E '^token'"
+cmd = ("kubectl describe secret -n metacontroller $(kubectl get secrets"
+       " -n metacontroller | grep ^resiliency | cut -f1 -d ' ')"
+       " | grep -E '^token'"
        "|cut -f2 -d':'|tr -d ' '")
 token = subprocess.check_output(cmd, stderr=subprocess.STDOUT,
                                 shell=True).decode('utf-8').strip("\n")

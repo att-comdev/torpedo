@@ -238,10 +238,12 @@ class GenericClient():
                 message = response.text
             return tc_status, message
         except Exception as e:
+            tc_status = 'FAIL'
             error_msg = "{}: {}".format(e.__class__.__name__, e)
             response = requests.Response()
             response.status_code = -1
             response._content = str.encode(error_msg)
+            return tc_status, response._content
 
     def POST(self, url, headers, data=None):
         """ Hit a post request on passed url """
