@@ -20,7 +20,7 @@ metacontroller=enabled
 
 Label the nodes on which Torpedo should run as torpedo-controller=enabled
 
-Label the nodes on which traffic and chaos jobs to run as resilency=enabled
+Label the nodes on which traffic and chaos jobs to run as resiliency=enabled
 
 Label the nodes on which log-collector jobs to run as log-collector=enabled
 ```
@@ -80,7 +80,7 @@ cat torpedo/webhook.yaml | kubectl create -n metacontroller -f –
 ### Trigger the test suite
 
 ```
-      cat <test-suite> | kubectl create -f -
+      cat <test-suite> | kubectl -n metacontroller create -f -
 ```
 
 #### Note:

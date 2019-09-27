@@ -6,19 +6,28 @@ IMAGE_TAG           ?= v1
 PROXY               ?= http://proxy.foo.com:8000
 NO_PROXY            ?= localhost,127.0.0.1,.svc.cluster.local
 USE_PROXY           ?= false
-PUSH_TRAFFIC_IMAGE  ?= true
-PUSH_CHAOS_IMAGE    ?= true
+PUSH_TRAFFIC_IMAGE  ?= false
+PUSH_CHAOS_IMAGE    ?= false
 # use this variable for image labels added in internal build process
 PYTHON              = python3
 TRAFFIC_IMAGE       := ${IMAGE_PREFIX}/${TRAFFIC_IMAGE_NAME}:${IMAGE_TAG}
 CHAOS_IMAGE         := ${IMAGE_PREFIX}/${CHAOS_IMAGE_NAME}:${IMAGE_TAG}
 UBUNTU_BASE_IMAGE   ?=
 
-#.PHONY: all
-#all: lint charts images
+.PHONY: all
+all: install_argo install_metacontroller install_torpedo_controller build_torpedo_chaos build_torpedo_orchestrator
 
-.PHONY: build_torpedo_chaos
-build_torpedo_chaos: build_torpedo_orchestrator
+#.PHONY: install_metacontroller
+#install_metacontroller: install_argo
+#
+#.PHONY: install_torpedo_controller
+#install_torpedo_controller: install_metacontroller
+#
+#.PHONY: build_torpedo_orchestrator
+#build_torpedo_orchestrator: install_torpedo_controller
+#
+#.PHONY: build_torpedo_chaos
+#build_torpedo_chaos: build_torpedo_orchestrator
 
 .PHONY: docs
 docs: clean build_docs
@@ -26,15 +35,6 @@ docs: clean build_docs
 .PHONY: build_docs
 build_docs:
 	tox -e docs
-
-.PHONY: install_metacontroller
-install_metacontroller: build_torpedo
-
-.PHONY: install_argo
-install_argo: install_metacontroller
-
-.PHONY: install_torpedo_controller
-install_torpedo_controller: install_argo
 
 _BASE_IMAGE_ARG := $(if $(UBUNTU_BASE_IMAGE),--build-arg FROM="${UBUNTU_BASE_IMAGE}" ,)
 
@@ -93,18 +93,33 @@ endif
 .PHONY: install_metacontroller
 install_metacontroller:
 		kubectl create ns metacontroller
-		cat torpedo/metacontroller-rbac.yaml | kubectl create -n metacontroller -f –
-		cat torpedo/metacontroller.yaml | kubectl create -n metacontroller -f –
+		kubectl create -n metacontroller -f torpedo/metacontroller-rbac.yaml
+		kubectl create -n metacontroller -f torpedo/install_metacontroller.yaml
 
 .PHONY: install_argo
 install_argo:
 		kubectl create ns argo
-		cat torpedo/install.yaml | kubectl create -n argo -f –
+		kubectl create -n argo -f torpedo/install_argo.yaml
 
 .PHONY: install_torpedo_controller
 install_torpedo_controller:
-		cat torpedo/torpedo_crd.yaml | kubectl create -f -
-		cat torpedo/controller.yaml | kubectl create -f -
-		cat torpedo/resiliency_rbac.yaml | kubectl create -f -
-		cat torpedo/sync.yaml | kubectl create -n metacontroller -f –
-		cat torpedo/webhook.yaml | kubectl create -n metacontroller -f –
+		kubectl create configmap torpedo-metacontroller -n metacontroller --from-file=torpedo-metacontroller=torpedo/torpedo_metacontroller.py
+		kubectl create -n metacontroller -f torpedo/torpedo-controller.yaml 
+		kubectl create -n metacontroller -f torpedo/webhook.yaml
+		kubectl create -f torpedo/torpedo_crd.yaml
+		kubectl create -f torpedo/controller.yaml
+		kubectl create -f torpedo/resiliency_rbac.yaml
+
+.PHONY: clean
+clean:
+		kubectl delete -f torpedo/torpedo_crd.yaml
+		kubectl delete -f torpedo/controller.yaml
+		kubectl delete -n metacontroller -f torpedo/metacontroller-rbac.yaml
+		kubectl delete -n metacontroller -f torpedo/install_metacontroller.yaml
+		kubectl delete -n argo -f torpedo/install_argo.yaml
+		kubectl delete -f torpedo/resiliency_rbac.yaml
+		kubectl delete configmap torpedo-metacontroller -n metacontroller
+		kubectl delete -n metacontroller -f torpedo/torpedo-controller.yaml
+		kubectl delete -n metacontroller -f torpedo/webhook.yaml
+		kubectl delete ns metacontroller
+		kubectl delete ns argo
