@@ -23,13 +23,13 @@ class Nova(Base, Openstack):
         flavor_id = self.gc.get_flavor_id(self.url, self.headers,
                                           name=self.tc['flavor'])
         image_id = self.gc.get_image_id(self.headers)
-        network = self.gc.get_network_id(self.headers)
+        network = self.gc.get_network_id(self.headers, self.tc['private_network'])
         self.tc['data'] = {
             'server': {
                 "name": "resiliency_vm_{}".format(random_string),
                 "imageRef": image_id,
                 "flavorRef": flavor_id,
-                "networks": network
+                "networks": [{ "uuid": network }]
                 }
         }
         response = self.gc.POST(self.url, self.headers, data=self.tc['data'])

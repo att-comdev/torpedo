@@ -15,7 +15,7 @@ CHAOS_IMAGE         := ${IMAGE_PREFIX}/${CHAOS_IMAGE_NAME}:${IMAGE_TAG}
 UBUNTU_BASE_IMAGE   ?=
 
 .PHONY: all
-all: install_argo install_metacontroller install_torpedo_controller build_torpedo_chaos build_torpedo_orchestrator
+all: install_argo install_metacontroller install_torpedo_controller
 
 #.PHONY: install_metacontroller
 #install_metacontroller: install_argo

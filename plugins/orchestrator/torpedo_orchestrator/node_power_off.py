@@ -38,9 +38,8 @@ class power_operation():
             try:
                 ipmi_object = self.initialize_ipmi_session()
                 response = ipmi_object.set_power(state)
-                ipmi_object.ipmi_session.logout()
                 status = True
-                return response, status
+                break
             except IpmiException as iex:
                 logger.error("Error sending command: %s" % str(iex))
                 logger.warning(
@@ -49,6 +48,8 @@ class power_operation():
                     ipmi_object.ipmi_session.logout()
                 sleep(15)
                 attempts = attempts + 1
+                status = False
+        return response, status
 
     def get_power_state(self):
         """ Get current power state of the node """
@@ -73,6 +74,7 @@ class NodePowerOff:
                 response, status = po.set_power_state("off")
                 if status:
                     break
+                attempts += 1
             tc_status = "PASS"
             message = "Powered off the node %s" % (node['node_name'])
         return tc_status, message, self.tc

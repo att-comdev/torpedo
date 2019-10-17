@@ -136,7 +136,7 @@ class GenericClient():
             if name == flavor['name']:
                 return flavor['id']
 
-    def get_network_id(self, headers):
+    def get_network_id(self, headers, name):
         url = self.get_endpoint(service='network', interface='public')
         network_url = url + 'v2.0/networks'
         try:
@@ -150,7 +150,7 @@ class GenericClient():
         response_json = self.load_json_data(response.text)
         networks = response_json['networks']
         for network in networks:
-            if network['name'] == 'public':
+            if network['name'] == name:
                 return network['id']  # , response.json()['port']['id']
 
     def get_vm_port_id(self, headers, vm_id):
@@ -169,8 +169,8 @@ class GenericClient():
         port_id = response_json['interfaceAttachments'][0]['port_id']
         return port_id
 
-    def create_floating_ip(self, headers, port_id):
-        public_network_id = self.get_network_id(headers)
+    def create_floating_ip(self, headers, port_id, network):
+        public_network_id = self.get_network_id(headers, network)
         url = self.get_endpoint(service='network', interface='public')
         network_url = url + 'v2.0/floatingips'
         data = {

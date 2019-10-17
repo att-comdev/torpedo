@@ -74,7 +74,7 @@ if __name__ == "__main__":
     else:
         extra_args = []
     if inputs[7]:
-        pod_labels = ast.literal_eval(inputs[7])
+        pod_labels = ",".join(ast.literal_eval(inputs[7]))
     else:
         pod_labels = []
     run = Runner()

@@ -23,8 +23,10 @@ cmd = ("kubectl describe secret -n metacontroller $(kubectl get secrets"
        "|cut -f2 -d':'|tr -d ' '")
 token = subprocess.check_output(cmd, stderr=subprocess.STDOUT,
                                 shell=True).decode('utf-8').strip("\n")
-server = "https://kubernetes-apiserver.kube-system.svc.cluster.local:6443"
-
+cmd = ('kubectl config view --minify | grep server |'
+       'cut -f 2- -d ":" | tr -d " "')
+server = subprocess.check_output(cmd, stderr=subprocess.STDOUT,
+                                 shell=True).decode('utf-8').strip("\n")
 pod_conn = Pods(token=token, host=server)
 
 

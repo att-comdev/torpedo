@@ -23,7 +23,7 @@ class VmPing(Nova):
         if tc_status is not 'FAIL':
             port_id = self.gc.get_vm_port_id(self.headers, vm_id)
             (floating_ip_id, floating_ip) = self.gc.create_floating_ip(
-                self.headers, port_id)
+                self.headers, port_id, self.tc['public_network'])
             logger.info(
                 'Performing ping test on floating ip,'
                 '{} of vm {}'.format(
@@ -32,10 +32,11 @@ class VmPing(Nova):
                 "kubectl delete po -n openstack --field-selector"
                 " spec.nodeName=%s -l %s|awk 'FNR == 2 {print $1}'" % (
                     hostname, self.pod_labels))
+            logger.info(pod_delete_cmd)
             logger.info(subprocess.check_output(pod_delete_cmd,
                         stderr=subprocess.STDOUT,
                         shell=True).decode('utf-8').strip("\n"))
-            cmd = "ping -w {} {}".format(self.tc['duration'], floating_ip)
+            cmd = "ping -c {} {}".format("180", floating_ip)
             exit_code = subprocess.check_output(
                 cmd,
                 stderr=subprocess.STDOUT,

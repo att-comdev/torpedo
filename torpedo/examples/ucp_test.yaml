@@ -38,5 +38,5 @@ spec:
   volume_storage: "10Gi"
   volume_name: "ucp-torpedo-test"
   remote-cluster: "True"
-  remote-cluster-endpoint: "<remote cluster endpoint of kubernetes apiserver>"
+  kube-apiserver: "<endpoint of kubernetes apiserver>"
   remote-cluster-token: "<kubernetes token to authenticate to the cluster>"
