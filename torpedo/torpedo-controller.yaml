@@ -21,7 +21,7 @@ data:
             apiVersion: batch/v1
             kind: Job
             metadata:
-              generateName: sanity-checks-
+              generateName: sanity-checks-{{inputs.parameters.name}}-
               namespace: metacontroller
             spec:
               template:

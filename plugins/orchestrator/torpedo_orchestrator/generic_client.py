@@ -129,12 +129,19 @@ class GenericClient():
         url = url.replace('servers', 'flavors')
         if self.token is None:
             self.token = self.get_openstack_token()
-        response = requests.get(url, headers=headers)
-        response_json = self.load_json_data(response.text)
-        all_flavors = response_json['flavors']
-        for flavor in all_flavors:
-            if name == flavor['name']:
-                return flavor['id']
+        try:
+            response = requests.get(url, headers=headers)
+            response_json = self.load_json_data(response.text)
+            all_flavors = response_json['flavors']
+            for flavor in all_flavors:
+                if name == flavor['name']:
+                    return flavor['id']
+        except Exception as e:
+            error_msg = "{}: {}".format(e.__class__.__name__, e)
+            response = requests.Response()
+            response.status_code = -1
+            response._content = str.encode(error_msg)
+            return response
 
     def get_network_id(self, headers, name):
         url = self.get_endpoint(service='network', interface='public')
@@ -207,12 +214,19 @@ class GenericClient():
     def get_image_id(self, headers):
         url = self.get_endpoint(service='image', interface='public')
         url += '/v2/images'
-        response = requests.get(url, headers=headers)
-        response_json = self.load_json_data(response.text)
-        images = response_json['images']
-        for image in images:
-            if image['name'] == 'cirros':
-                return image['id']
+        try:
+            response = requests.get(url, headers=headers)
+            response_json = self.load_json_data(response.text)
+            images = response_json['images']
+            for image in images:
+                if image['name'] == 'cirros':
+                    return image['id']
+        except Exception as e:
+            error_msg = "{}: {}".format(e.__class__.__name__, e)
+            response = requests.Response()
+            response.status_code = -1
+            response._content = str.encode(error_msg)
+            return response
 
     def check_resource_status(self, url, headers, data=""):
         try:

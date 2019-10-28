@@ -1,3 +1,5 @@
+from time import time
+
 from base import Base
 from logger_agent import logger
 from openstack import Openstack
@@ -26,8 +28,17 @@ class Cinder(Base, Openstack):
             result = self.gc.check_resource_status(poll_url, self.headers)
             logger.info("Waiting for the volume %s to be available" % (
                 volume_id))
+            ts = time()
             while result.json()['volume']['status'] != "available":
                 result = self.gc.check_resource_status(poll_url, self.headers)
+                if result.status_code < 200 and result.status_code > 400:
+                    tc_status = 'FAIL'
+                    message = result.text
+                    break
+                if (time() - ts) == 600:
+                    tc_status = "FAIL"
+                    message = "Timed out waiting for the stack to complete"
+                    break
                 if result.json()['volume']['status'] == "error":
                     tc_status = "FAIL"
                     message = result.text

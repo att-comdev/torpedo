@@ -1,6 +1,8 @@
 import random
 import string
 
+from time import time
+
 from base import Base
 from logger_agent import logger
 from openstack import Openstack
@@ -32,6 +34,8 @@ class Nova(Base, Openstack):
                 "networks": [{ "uuid": network }]
                 }
         }
+        vm_id = ""
+        hostname = ""
         response = self.gc.POST(self.url, self.headers, data=self.tc['data'])
         if response.status_code >= 200 and response.status_code < 400:
             tc_status = "PASS"
@@ -39,6 +43,7 @@ class Nova(Base, Openstack):
             vm_id = response.json()['server']['id']
             url = self.url + '/' + vm_id
             result = self.gc.check_resource_status(url, self.headers)
+            ts = time()
             logger.info("Waiting for %s vm to come to active state" % (vm_id))
             if result.status_code >= 200 and result.status_code < 400:
                 while result.json()['server']['status'].lower() != 'active':
@@ -46,14 +51,21 @@ class Nova(Base, Openstack):
                         tc_status = 'FAIL'
                         message = 'stripped not printing'
                         break
+                    if (time() - ts) == 600:
+                        tc_status = "FAIL"
+                        message = "Timed out waiting for the stack to complete"
+                        break
                     result = self.gc.check_resource_status(url, self.headers)
+                    if result.status_code < 200 and result.status_code > 400:
+                        tc_status = 'FAIL'
+                        message = result.text
+                        break
+                  
             if tc_status == "PASS":
                 hostname = result.json()['server']['OS-EXT-SRV-ATTR:host']
         else:
             tc_status = "FAIL"
             message = result.text
-            vm_id = ""
-            hostname = ""
         return tc_status, message, vm_id, hostname
 
     def delete_vm(self, vm_id):
