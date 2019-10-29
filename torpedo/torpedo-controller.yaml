@@ -219,7 +219,7 @@ data:
                           - name: default-cluster
                             cluster:
                               insecure-skip-tls-verify: true
-                              server: {{spec['remote-cluster-endpoint']}}
+                              server: {{spec['kube-apiserver']}}
                           contexts:
                           - name: default-context
                             context:

@@ -64,8 +64,6 @@ class Controller(BaseHTTPRequestHandler):
                 "cat /var/run/secrets/kubernetes.io/serviceaccount/token",
                 stderr=subprocess.STDOUT,
                 shell=True).decode('utf-8').strip("\n")
-            job['spec']['remote-cluster-endpoint'] = \
-                "https://kubernetes-apiserver.kube-system.svc.cluster.local:6443"
             job['spec']['remote-cluster-token'] = token
         with open(orchestrator_path, "r") as f:
             wf = yaml.load(f)
